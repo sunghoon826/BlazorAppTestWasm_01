@@ -1,0 +1,66 @@
+﻿@page "/TestPage"
+
+@using BlazorAppTestWasm.Shared;
+@inject HttpClient Http
+
+<h3>Name</h3>
+<input type="text" @bind="inputName">
+
+<h3>Age</h3>
+<input type="text" @bind="inputAge">
+
+<button class="btn btn-primary" @onclick="InsertNewData">Insert</button>
+
+@if (employees == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Age</th>               
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Id</td>
+                    <td>@employee.Name</td>
+                    <td>@employee.Age</td>
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string? inputName;
+
+    private string? inputAge;
+
+    private List<Employee>? employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.employees = await Http.GetFromJsonAsync<List<Employee>>("api/Employee/read");
+        //forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+    }
+
+    private async Task InsertNewData()
+    {
+        Employee employee = new Employee() { Name = this.inputName, Age = Convert.ToInt16(this.inputAge)};
+
+        var response = await Http.PostAsJsonAsync<Employee>("api/Employee/insert", employee); //api/Employee/insert 데이터를 body에 감싸서 서버쪽으로 전달
+
+        if (response.IsSuccessStatusCode) //서버로부터 return 받은 값을 체크
+        { 
+            
+        }
+    }
+}
